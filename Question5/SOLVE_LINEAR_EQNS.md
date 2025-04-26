@@ -46,54 +46,69 @@ def solveEqns(eqn1, eqn2):
   - This helps handle inputs where formatting might be inconsistent or include line breaks
 
 ```python
-    # Extract coefficients using simple string operations
     def extract_coefficients(equation):
+        """Extract the coefficients (a, b, c) from an equation string of form 'a x + b y = c'"""
         # Split the equation at the equals sign
         left_side, right_side = equation.split('=')
         
-        # Get the constant (c) from the right side
+        # Extract constant c from right side
         c = int(right_side.strip())
         
-        # Find the position of 'x' and 'y' in the left side
-        x_index = left_side.find('x')
-        y_index = left_side.find('y')
-        
-        # Extract the coefficient of x
-        x_part = left_side[:x_index].strip()
-        # If x_part is empty or just a '+', coefficient is 1
-        # If x_part is '-', coefficient is -1
-        if not x_part or x_part == '+':
-            a = 1
-        elif x_part == '-':
-            a = -1
-        else:
-            a = int(x_part)
-        
-        # Extract the coefficient of y
-        # Find the part between 'x' and 'y'
-        middle_part = left_side[x_index+1:y_index].strip()
-        if middle_part.startswith('+'):
-            middle_part = middle_part[1:].strip()  # Remove the '+' sign
-            
-        if not middle_part:
-            b = 1
-        elif middle_part == '-':
-            b = -1
-        else:
-            b = int(middle_part)
-            
-        return a, b, c
+        # Extract coefficients using a simpler approach
+        parts = left_side.replace('x', ' x ').replace('y', ' y ').split()
 ```
 - **Coefficient extraction helper function**: 
   - This function uses basic string operations that are easier for beginners to understand
-  - It extracts the coefficients of x and y and the constant from an equation string
-  - The function works by:
-    1. Splitting the equation at the equals sign to get left and right sides
-    2. Getting the constant (c) from the right side
-    3. Finding where 'x' and 'y' occur in the left side
-    4. Extracting the part before 'x' to get coefficient a
-    5. Extracting the part between 'x' and 'y' to get coefficient b
-    6. Handling special cases like if the coefficient is 1 (often written without a number)
+  - It splits the equation into left and right sides at the equals sign
+  - The right side is converted to an integer to get the constant term c
+  - The left side is preprocessed by adding spaces around 'x' and 'y', then split into words
+  - This preprocessing makes it easier to identify the variables and their coefficients
+
+```python
+        # Initialize coefficients
+        a, b = 0, 0
+        
+        # Process each part to find coefficients
+        i = 0
+        while i < len(parts):
+            if 'x' in parts[i]:
+                # Found x variable, get its coefficient
+                if i == 0 or parts[i-1] == '+':
+                    a = 1  # Implied coefficient is 1
+                elif parts[i-1] == '-':
+                    a = -1  # Implied coefficient is -1
+                else:
+                    a = int(parts[i-1])  # Explicit coefficient
+                    if i >= 2 and parts[i-2] == '-':
+                        a = -a  # Handle negative sign
+```
+- **Processing x coefficient**: 
+  - We loop through the parts and look for 'x'
+  - When we find 'x', we extract its coefficient based on what comes before it:
+    - If 'x' is the first part or has a '+' before it, the coefficient is 1
+    - If 'x' has a '-' before it, the coefficient is -1
+    - Otherwise, the part before 'x' is the coefficient
+    - We also check for a minus sign two positions back to handle cases like "- 2 x"
+
+```python
+            elif 'y' in parts[i]:
+                # Found y variable, get its coefficient
+                if i == 0 or parts[i-1] == '+':
+                    b = 1  # Implied coefficient is 1
+                elif parts[i-1] == '-':
+                    b = -1  # Implied coefficient is -1
+                else:
+                    b = int(parts[i-1])  # Explicit coefficient
+                    if i >= 2 and parts[i-2] == '-':
+                        b = -b  # Handle negative sign
+            i += 1
+        
+        return a, b, c
+```
+- **Processing y coefficient**: 
+  - Similar to 'x' coefficient extraction, we check for 'y' and extract its coefficient
+  - The same rules apply for determining if the coefficient is 1, -1, or an explicit number
+  - We also handle the case where there's a minus sign before a number
 
 ```python
     # Extract coefficients from both equations
@@ -130,170 +145,134 @@ def solveEqns(eqn1, eqn2):
   - The solution is explicitly converted to float type
   - The solution is returned as a tuple (x, y) as requested in the problem statement
 
-## Beginner-Friendly String Parsing
+## How the String Parsing Works
 
-The updated solution uses a simple string parsing approach instead of regular expressions, making it more accessible for beginners. Here's how it works step-by-step:
+Let's walk through an example of how our improved parsing algorithm works:
 
-### 1. Splitting the Equation
+### Example: "2x + 3y = 8"
 
-```python
-left_side, right_side = equation.split('=')
-```
+1. **Split at equals sign**: 
+   - `left_side` = "2x + 3y"
+   - `right_side` = "8"
+   - `c` = 8 (converting right_side to integer)
 
-This divides the equation at the equals sign. For "1 x + 0 y = 1":
-- `left_side` becomes "1 x + 0 y"
-- `right_side` becomes "1"
+2. **Add spaces around variables and split**:
+   - `left_side.replace('x', ' x ').replace('y', ' y ')` = "2 x  + 3 y "
+   - `parts` = ['2', 'x', '+', '3', 'y']
 
-### 2. Getting the Constant
+3. **Process each part**:
+   - `i=0, parts[0]='2'` (not 'x' or 'y', so move on)
+   - `i=1, parts[1]='x'` (it's 'x', so extract coefficient)
+     - The previous part is '2', so `a = 2`
+     - No need to check for minus sign since there isn't one
+   - `i=2, parts[2]='+'` (not 'x' or 'y', so move on)
+   - `i=3, parts[3]='3'` (not 'x' or 'y', so move on)
+   - `i=4, parts[4]='y'` (it's 'y', so extract coefficient)
+     - The previous part is '3', so `b = 3`
+     - No need to check for minus sign since there isn't one
 
-```python
-c = int(right_side.strip())
-```
+4. **Return coefficients**:
+   - `a = 2, b = 3, c = 8`
 
-This converts the right side of the equation to an integer after removing any extra spaces.
+### Example: "1x - 1y = 1"
 
-### 3. Finding Variable Positions
+1. **Split at equals sign**: 
+   - `left_side` = "1x - 1y"
+   - `right_side` = "1"
+   - `c` = 1
 
-```python
-x_index = left_side.find('x')
-y_index = left_side.find('y')
-```
+2. **Add spaces around variables and split**:
+   - `left_side.replace('x', ' x ').replace('y', ' y ')` = "1 x  - 1 y "
+   - `parts` = ['1', 'x', '-', '1', 'y']
 
-This finds where the variables 'x' and 'y' appear in the left side. For "1 x + 0 y":
-- `x_index` would be 2 (the position of 'x')
-- `y_index` would be 8 (the position of 'y')
+3. **Process each part**:
+   - `i=0, parts[0]='1'` (not 'x' or 'y', so move on)
+   - `i=1, parts[1]='x'` (it's 'x', so extract coefficient)
+     - The previous part is '1', so `a = 1`
+   - `i=2, parts[2]='-'` (not 'x' or 'y', so move on)
+   - `i=3, parts[3]='1'` (not 'x' or 'y', so move on)
+   - `i=4, parts[4]='y'` (it's 'y', so extract coefficient)
+     - The previous part is '1', so `b = 1`
+     - The part before that is '-', so we need to negate: `b = -1`
 
-### 4. Extracting the x Coefficient
+4. **Return coefficients**:
+   - `a = 1, b = -1, c = 1`
 
-```python
-x_part = left_side[:x_index].strip()
-if not x_part or x_part == '+':
-    a = 1
-elif x_part == '-':
-    a = -1
-else:
-    a = int(x_part)
-```
-
-This gets everything before 'x', then handles special cases:
-- If there's nothing or just a '+' before 'x' (like in "+x"), the coefficient is 1
-- If there's just a '-' before 'x' (like in "-x"), the coefficient is -1
-- Otherwise, convert the string to an integer
-
-### 5. Extracting the y Coefficient
-
-```python
-middle_part = left_side[x_index+1:y_index].strip()
-if middle_part.startswith('+'):
-    middle_part = middle_part[1:].strip()  # Remove the '+' sign
-    
-if not middle_part:
-    b = 1
-elif middle_part == '-':
-    b = -1
-else:
-    b = int(middle_part)
-```
-
-This gets the part between 'x' and 'y', handles the '+' sign if present, and determines the coefficient with the same rules as for 'x'.
-
-### Benefits of This Approach
-
-1. **More beginner-friendly**: Uses basic string methods that new programmers are likely familiar with
-2. **Better readability**: Each step explicitly states what it's trying to extract
-3. **Easier to debug**: If something goes wrong, it's easier to figure out which specific step failed
-4. **Educational value**: Demonstrates how to break down text parsing into simple steps
+This approach handles a variety of formats, including:
+- Cases with no spaces: "2x+3y=8"
+- Cases with many spaces: "2  x  +  3  y  =  8"
+- Cases with implicit coefficients: "x+y=2" (treated as 1x+1y=2)
+- Cases with negative coefficients: "-x-y=3" or "- 2 x - 3 y = 4"
 
 ## Mathematical Explanation
 
-### Coefficient Matrix
+### System of Linear Equations
 
-A coefficient matrix is a rectangular array of numbers arranged in rows and columns that represents the coefficients of variables in a system of linear equations. In our case, for a system of two linear equations with two variables (x and y), the coefficient matrix is a 2×2 matrix:
-
+A system of linear equations with two variables x and y can be written as:
 ```
-A = [a1 b1]
-    [a2 b2]
-```
-
-Where:
-- `a1` is the coefficient of x in the first equation
-- `b1` is the coefficient of y in the first equation
-- `a2` is the coefficient of x in the second equation
-- `b2` is the coefficient of y in the second equation
-
-For example, with the system:
-```
-1x + 0y = 1
-1x + 1y = 3
-```
-
-The coefficient matrix is:
-```
-A = [1 0]
-    [1 1]
-```
-
-The coefficient matrix encodes the relationships between the variables in our system. Each row corresponds to one equation, and each column corresponds to one variable.
-
-### Constant Vector
-
-A constant vector (sometimes called the "right-hand side" or RHS vector) contains the constant terms from each equation in the system. For our system of two equations, it's a column vector with two elements:
-
-```
-B = [c1]
-    [c2]
+a₁x + b₁y = c₁
+a₂x + b₂y = c₂
 ```
 
 Where:
-- `c1` is the constant term in the first equation
-- `c2` is the constant term in the second equation
+- a₁, b₁, c₁ are the coefficients and constant of the first equation
+- a₂, b₂, c₂ are the coefficients and constant of the second equation
 
-For our example:
-```
-1x + 0y = 1
-1x + 1y = 3
-```
+### Matrix Representation
 
-The constant vector is:
+This system can be represented in matrix form as Ax = B, where:
+
 ```
-B = [1]
-    [3]
+A = [a₁ b₁]    x = [x]    B = [c₁]
+    [a₂ b₂]        [y]        [c₂]
 ```
 
-### What np.linalg.solve Does
+### Why Use NumPy's Linear Algebra Functions?
 
-The `np.linalg.solve(A, B)` function in NumPy solves a system of linear equations in the form Ax = B, where:
-- A is the coefficient matrix
-- B is the constant vector
-- x is the vector of variables we want to solve for
+NumPy's linear algebra module (`numpy.linalg`) provides efficient and numerically stable solutions for linear systems:
 
-Specifically, it performs the following operations:
+1. **Efficiency**: The algorithms are implemented in optimized C and Fortran code
+2. **Numerical Stability**: They use techniques like pivoting to minimize rounding errors
+3. **Handling Special Cases**: They can detect and handle cases where the system has no solution or infinitely many solutions
 
-1. **Matrix Decomposition**: It uses a technique called LU decomposition (Lower-Upper) to factorize the coefficient matrix into the product of a lower triangular matrix L and an upper triangular matrix U. This decomposition is efficient for solving linear systems.
+### How np.linalg.solve Works
 
-2. **Forward and Backward Substitution**: After decomposition, it applies forward and backward substitution algorithms to solve the system. Forward substitution solves Ly = B for y, and backward substitution solves Ux = y for x.
+The `np.linalg.solve` function uses LU decomposition, which:
 
-3. **Solution Verification**: It checks if the solution is valid (checks for singular matrices, which would indicate no unique solution exists).
+1. Decomposes matrix A into a lower triangular matrix L and an upper triangular matrix U
+2. Solves Ly = B for y using forward substitution
+3. Solves Ux = y for x using backward substitution
 
-4. **Optimization**: The implementation uses highly optimized LAPACK routines (Linear Algebra PACKage), which are written in Fortran and are extremely efficient for numerical linear algebra operations.
+This is much more efficient than manually solving the system using algebra, especially for larger systems.
 
-The result of `np.linalg.solve(A, B)` is a NumPy array containing the values of the variables that satisfy the system of equations. In our case, it returns [x, y], the solution to the system.
+## Why This Approach Is Good for First Semester CS Students
 
-For the example system:
+This solution is suitable for first-semester computer science students because:
+
+1. **Simple String Operations**: Uses basic string methods like `split()`, `replace()`, and `strip()`
+2. **Basic Control Flow**: Uses simple loops and conditionals
+3. **Step-by-Step Processing**: Processes the equation piece by piece in a logical sequence
+4. **Clear Variable Names**: Uses descriptive variable names that make the code's purpose clear
+5. **NumPy Abstraction**: Uses NumPy to handle the complex linear algebra, letting students focus on the problem-solving aspects
+
+## Testing the Solution
+
+The code includes several test cases to verify that it works correctly:
+
+```python
+# Test with the example from the problem statement
+eqn1 = "1 x + 0 y = 1"
+eqn2 = "1 x + 1 y = 3"
+result = solveEqns(eqn1, eqn2)
+print(f"Solution: x = {result[0]}, y = {result[1]}")
+# Expected output: x = 1.0, y = 2.0
 ```
-[1 0] [x] = [1]
-[1 1] [y]   [3]
-```
 
-The solution is x = 1.0, y = 2.0, which you can verify:
-1. First equation: 1(1.0) + 0(2.0) = 1 ✓
-2. Second equation: 1(1.0) + 1(2.0) = 3 ✓
+This example from the problem statement should yield x = 1.0, y = 2.0.
 
-## Why Use NumPy Instead of Manual Calculation?
+Additional test cases check different equation formats:
+- `("2x + 3y = 8", "1x - 1y = 1")` - Testing compact notation and negative coefficients
+- `("3 x + 2 y = 14", "5 x - 1 y = 17")` - Testing spaced notation
+- `("1x + 0y = 5", "0x + 1y = 3")` - Testing zero coefficients
 
-For a simple 2×2 system, we could have used Cramer's Rule or direct substitution to solve the system. However, using NumPy offers several advantages:
-
-1. **Scalability**: The same approach works for larger systems with many variables
-2. **Numerical Stability**: NumPy uses algorithms that minimize numerical errors
-3. **Efficiency**: The underlying LAPACK routines are highly optimized for performance
-4. **Simplicity**: The code is cleaner and easier to understand
+These cases help verify the robustness of the solution against different input formats and equation types.

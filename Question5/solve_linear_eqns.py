@@ -15,42 +15,46 @@ def solveEqns(eqn1, eqn2):
     eqn1 = ' '.join(eqn1.replace('\n', ' ').split())
     eqn2 = ' '.join(eqn2.replace('\n', ' ').split())
     
-    # Extract coefficients using simple string operations
     def extract_coefficients(equation):
+        """Extract the coefficients (a, b, c) from an equation string of form 'a x + b y = c'"""
         # Split the equation at the equals sign
         left_side, right_side = equation.split('=')
         
-        # Get the constant (c) from the right side
+        # Extract constant c from right side
         c = int(right_side.strip())
         
-        # Find the position of 'x' and 'y' in the left side
-        x_index = left_side.find('x')
-        y_index = left_side.find('y')
+        # Extract coefficients using a simpler approach
+        parts = left_side.replace('x', ' x ').replace('y', ' y ').split()
         
-        # Extract the coefficient of x
-        x_part = left_side[:x_index].strip()
-        # If x_part is empty or just a '+', coefficient is 1
-        # If x_part is '-', coefficient is -1
-        if not x_part or x_part == '+':
-            a = 1
-        elif x_part == '-':
-            a = -1
-        else:
-            a = int(x_part)
+        # Initialize coefficients
+        a, b = 0, 0
         
-        # Extract the coefficient of y
-        # Find the part between 'x' and 'y'
-        middle_part = left_side[x_index+1:y_index].strip()
-        if middle_part.startswith('+'):
-            middle_part = middle_part[1:].strip()  # Remove the '+' sign
+        # Process each part to find coefficients
+        i = 0
+        while i < len(parts):
+            if 'x' in parts[i]:
+                # Found x variable, get its coefficient
+                if i == 0 or parts[i-1] == '+':
+                    a = 1  # Implied coefficient is 1
+                elif parts[i-1] == '-':
+                    a = -1  # Implied coefficient is -1
+                else:
+                    a = int(parts[i-1])  # Explicit coefficient
+                    if i >= 2 and parts[i-2] == '-':
+                        a = -a  # Handle negative sign
             
-        if not middle_part:
-            b = 1
-        elif middle_part == '-':
-            b = -1
-        else:
-            b = int(middle_part)
-            
+            elif 'y' in parts[i]:
+                # Found y variable, get its coefficient
+                if i == 0 or parts[i-1] == '+':
+                    b = 1  # Implied coefficient is 1
+                elif parts[i-1] == '-':
+                    b = -1  # Implied coefficient is -1
+                else:
+                    b = int(parts[i-1])  # Explicit coefficient
+                    if i >= 2 and parts[i-2] == '-':
+                        b = -b  # Handle negative sign
+            i += 1
+        
         return a, b, c
     
     # Extract coefficients from both equations
@@ -69,8 +73,22 @@ def solveEqns(eqn1, eqn2):
 
 # Test example
 if __name__ == "__main__":
+    # Test with the example from the problem statement
     eqn1 = "1 x + 0 y = 1"
     eqn2 = "1 x + 1 y = 3"
     result = solveEqns(eqn1, eqn2)
     print(f"Solution: x = {result[0]}, y = {result[1]}")
     # Expected output: x = 1.0, y = 2.0
+    
+    # Additional test cases
+    test_cases = [
+        ("2x + 3y = 8", "1x - 1y = 1"),
+        ("3 x + 2 y = 14", "5 x - 1 y = 17"),
+        ("1x + 0y = 5", "0x + 1y = 3")
+    ]
+    
+    for tc_eqn1, tc_eqn2 in test_cases:
+        result = solveEqns(tc_eqn1, tc_eqn2)
+        print(f"Equations: '{tc_eqn1}' and '{tc_eqn2}'")
+        print(f"Solution: x = {result[0]}, y = {result[1]}")
+        print("---")
