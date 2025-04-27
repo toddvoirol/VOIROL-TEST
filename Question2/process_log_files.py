@@ -9,6 +9,7 @@ print(log_data.head())
 print()
 
 # Step 2: Remove any rows where Login is empty ("")
+# Make sure we're correctly identifying empty logins
 log_data = log_data[log_data['Login'] != '""']
 
 # Print after removing empty logins

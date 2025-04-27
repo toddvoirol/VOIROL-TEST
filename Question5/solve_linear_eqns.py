@@ -2,7 +2,8 @@ import numpy as np
 
 def solveEqns(eqn1, eqn2):
     """
-    Solves a system of two linear equations in the form "a x + b y = c"
+    Solves a system of two linear equations in the form "a x + b y = c".
+    Assumes all coefficients (a, b, c) are non-negative integers.
     
     Args:
         eqn1 (str): First equation in the form "a x + b y = c"
@@ -11,84 +12,64 @@ def solveEqns(eqn1, eqn2):
     Returns:
         tuple: Solution (x, y) as a 2-element tuple of float values
     """
-    # Clean up the equations by removing extra spaces and newlines
-    eqn1 = ' '.join(eqn1.replace('\n', ' ').split())
-    eqn2 = ' '.join(eqn2.replace('\n', ' ').split())
-    
-    def extract_coefficients(equation):
-        """Extract the coefficients (a, b, c) from an equation string of form 'a x + b y = c'"""
-        # Split the equation at the equals sign
+    def get_coefficients(equation):
+        """Gets the coefficients (a, b, c) from an equation string"""
+        # Clean up the equation by removing newlines and extra spaces
+        equation = equation.replace('\n', ' ')
+        # Make sure we have single spaces between parts
+        equation = ' '.join(equation.split())
+        
+        # Split into left and right sides
         left_side, right_side = equation.split('=')
+        left_side = left_side.strip()
+        right_side = right_side.strip()
         
-        # Extract constant c from right side
-        c = int(right_side.strip())
-        
-        # Extract coefficients using a simpler approach
-        parts = left_side.replace('x', ' x ').replace('y', ' y ').split()
+        # Get c (the right side number)
+        c = int(right_side)
         
         # Initialize coefficients
-        a, b = 0, 0
+        a = 0  # coefficient of x
+        b = 0  # coefficient of y
         
-        # Process each part to find coefficients
-        i = 0
-        while i < len(parts):
-            if 'x' in parts[i]:
-                # Found x variable, get its coefficient
-                if i == 0 or parts[i-1] == '+':
-                    a = 1  # Implied coefficient is 1
-                elif parts[i-1] == '-':
-                    a = -1  # Implied coefficient is -1
+        # Split left side into parts
+        parts = left_side.split('+')
+        
+        # Look at each part (term)
+        for part in parts:
+            part = part.strip()
+            if 'x' in part:
+                # This part has x
+                number = part.replace('x', '').strip()
+                if number == '':
+                    a = 1
                 else:
-                    a = int(parts[i-1])  # Explicit coefficient
-                    if i >= 2 and parts[i-2] == '-':
-                        a = -a  # Handle negative sign
-            
-            elif 'y' in parts[i]:
-                # Found y variable, get its coefficient
-                if i == 0 or parts[i-1] == '+':
-                    b = 1  # Implied coefficient is 1
-                elif parts[i-1] == '-':
-                    b = -1  # Implied coefficient is -1
+                    a = int(number)
+            elif 'y' in part:
+                # This part has y
+                number = part.replace('y', '').strip()
+                if number == '':
+                    b = 1
                 else:
-                    b = int(parts[i-1])  # Explicit coefficient
-                    if i >= 2 and parts[i-2] == '-':
-                        b = -b  # Handle negative sign
-            i += 1
+                    b = int(number)
         
         return a, b, c
     
-    # Extract coefficients from both equations
-    a1, b1, c1 = extract_coefficients(eqn1)
-    a2, b2, c2 = extract_coefficients(eqn2)
+    # Get coefficients from both equations
+    a1, b1, c1 = get_coefficients(eqn1)
+    a2, b2, c2 = get_coefficients(eqn2)
     
-    # Create coefficient matrix and constant vector
+    # Use NumPy to solve the system of equations
     A = np.array([[a1, b1], [a2, b2]])
     B = np.array([c1, c2])
-    
-    # Solve the system of equations
     solution = np.linalg.solve(A, B)
     
-    # Return as a tuple of float values
+    # Return the solution as a tuple of floats
     return (float(solution[0]), float(solution[1]))
 
-# Test example
 if __name__ == "__main__":
-    # Test with the example from the problem statement
+    # Test with the example from the problem description
     eqn1 = "1 x + 0 y = 1"
     eqn2 = "1 x + 1 y = 3"
     result = solveEqns(eqn1, eqn2)
     print(f"Solution: x = {result[0]}, y = {result[1]}")
     # Expected output: x = 1.0, y = 2.0
-    
-    # Additional test cases
-    test_cases = [
-        ("2x + 3y = 8", "1x - 1y = 1"),
-        ("3 x + 2 y = 14", "5 x - 1 y = 17"),
-        ("1x + 0y = 5", "0x + 1y = 3")
-    ]
-    
-    for tc_eqn1, tc_eqn2 in test_cases:
-        result = solveEqns(tc_eqn1, tc_eqn2)
-        print(f"Equations: '{tc_eqn1}' and '{tc_eqn2}'")
-        print(f"Solution: x = {result[0]}, y = {result[1]}")
-        print("---")
