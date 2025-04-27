@@ -1,8 +1,4 @@
-# Survey Data Visualization
-
-Solve the following example problem using Python code that a first semester computer science student could understand. It should consist of a single .py file and a .md document that explains the logic behind the solution and explains what each step is doing in detail.
-
-## Problem Description
+# Problem Description
 
 You have conducted a survey among other CS101 students which course topics they found the hardest, most useful, and most enjoyable to learn. You asked them to rate each of these categories on a scale from 1 to 5 and would now like to visualize your results.
 
