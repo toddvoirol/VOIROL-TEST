@@ -12,6 +12,90 @@ The repository is organized as follows:
 - **Question4/**: Matrix unscrambling solution with `matrix_unscramble.py` and `Matrix_Unscrambling_Explanation.md`
 - **Question5/**: Linear equations solver with `solve_linear_eqns.py` and `SOLVE_LINEAR_EQNS.md`
 
+## Running Unit Tests
+
+Each problem folder contains unit tests to verify the correctness of the Python solutions. These tests are designed to be understandable for first-semester Python students.
+
+### Prerequisites
+
+- Python 3.x installed on your system
+- Required packages: numpy, pandas, matplotlib (depending on the specific problem)
+
+### Running Tests for Individual Problems
+
+#### Question2: Log File Analysis
+```bash
+cd Question2
+python -m unittest test_process_log_files.py
+```
+Tests verify log filtering, transformation, sorting, and column selection.
+
+#### Question3: Survey Data Visualization
+```bash
+cd Question3
+python -m unittest test_visualize_survey_data.py
+```
+Tests verify figure layout, plot types, axis labels, and data mapping.
+
+#### Question4: Matrix Unscrambling
+```bash
+cd Question4
+python -m unittest test_matrix_unscramble.py
+```
+Tests verify matrix extraction, handling different sizes, and error handling.
+
+#### Question5: Linear Equation Solver
+```bash
+cd Question5
+python -m unittest test_solve_linear_eqns.py
+```
+Tests verify equation solving with different formats, coefficients, and spacing patterns.
+
+### Running All Tests at Once
+
+To run all tests across all problem folders from the project root:
+
+```bash
+python -m unittest discover -p "test_*.py"
+```
+
+### Understanding Test Results
+
+Successful tests show:
+```
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.123s
+
+OK
+```
+
+Failed tests provide details to help identify issues:
+```
+F....
+======================================================================
+FAIL: test_example_from_description (test_module.TestClass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  ...
+  AssertionError: ...
+```
+
+### Extending the Tests
+
+To add a new test:
+1. Create a new test method in the appropriate test class
+2. Name it starting with `test_` followed by a descriptive name
+3. Use assertions to verify expected behavior
+
+Example:
+```python
+def test_new_feature(self):
+    """Description of what this test verifies"""
+    # Test code here
+    self.assertEqual(actual_result, expected_result)
+```
+
 ## Key Concepts Overview
 
 ### DataFrame
